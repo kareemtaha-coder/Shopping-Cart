@@ -1,19 +1,19 @@
 import React from 'react'
-import {AiFillStar,AiOutlineStar} from "react-icons/ai"
-const Rating = ({rating ,onClick ,style}) => {
-  return (  <>
-    {[...Array(5)].map((_ , i)=> (
-  <span key={i} onClick={()=> onClick(i)} style={style}>{
-    rating > i ? (
-      <AiFillStar fontSize='15px'/>
-    ):(
-      <AiOutlineStar fontSize ='15px'/>
-    )
-  }</span>
-    ))
-  }
-  </>
+import { FaStar } from 'react-icons/fa'
+import './Rating.css'
 
+const Rating = ({ rating, onClick, style }) => {
+  return (
+    <div className="rating-container" style={style}>
+      {[...Array(5)].map((_, index) => (
+        <FaStar
+          key={index}
+          className={`star ${index < rating ? 'filled' : ''}`}
+          onClick={() => onClick && onClick(index)}
+        />
+      ))}
+      {rating > 0 && <span className="rating-text">{rating} Stars</span>}
+    </div>
   )
 }
 

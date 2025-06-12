@@ -1,69 +1,130 @@
 import React, { useEffect, useState } from 'react'
 import { CartState } from '../../Context/Context'
-import { Button, Col, Form, Image, ListGroup, ListGroupItem, Row } from 'react-bootstrap'
-import Rating from '../Rating'
-import { AiFillDelete } from 'react-icons/ai'
+import { FaTrash, FaShoppingBag, FaTruck, FaCreditCard } from 'react-icons/fa'
+import './Cart.css'
 
 export const Cart = () => {
-  const {state:{cart},dispatch} =CartState()
-  const [total, settotle] = useState()
-  useEffect(() => {
-    settotle((cart.reduce((acc,cur)=> (acc+ Number(cur.price.split(".")[0])*cur.qty ),0)))
-  }, [cart])
-  
-  return (
-    <div className='home'>
- <div className='ProductContainer'>
-  <ListGroup>
-  {cart.map((pro)=> (
-    <ListGroupItem key={pro.Id}>
-      <Row >
-       <Col md={2} >
-       <Image src={pro.image} alt={pro.name} fluid rounded style={{width:"6rem" ,height:"5rem"}} />
-       </Col>
-       <Col md={2}>
-       <span>{pro.name}</span>
-       </Col>
-       <Col md={2}>
-       <span>${pro.price.split(".")[0]}</span>
-       </Col>
-       <Col md={2}>
-       <Rating rating={pro.ratings}></Rating>
-       </Col>
-       <Col md={2}>
-      <Form.Select as="select" value={pro.qty}
-       onChange={(e)=> dispatch({
-      type:"Change_Cart_Qty",
-      payload:{
-        id:pro.Id,
-        qty:e.target.value
-      },
-     })}>
-{[...Array(pro.inStock).keys()].map((x)=>(
-  <option key={x+1}>{x+1}</option>
-))}
-      </Form.Select>
-       </Col>
-       <Col md={2}>
-     <Button type='button' variant='light' onClick={()=> dispatch({
-      type:"Remove_from_cart",
-      payload:pro,
-     })}>
-  <AiFillDelete fontSize="20px"/>
-     </Button>
-       </Col>
-      </Row>
-    </ListGroupItem>
+  const { state: { cart }, dispatch } = CartState()
+  const [total, setTotal] = useState(0)
 
-  ))} 
-  </ListGroup>
- </div>
- <div className='filters summary'>
- <span className='title'> Summary {cart.length} Items
- </span>
- <span style={{fontWeight:700 ,fontSize: 20}}>Total: $ {total}</span>
- <Button type='button' disabled={cart.length==0}>Preceed to Chackout</Button>
- </div>
+  useEffect(() => {
+    setTotal(cart.reduce((acc, cur) => acc + Number(cur.price) * cur.qty, 0))
+  }, [cart])
+
+  return (
+    <div className="cart-container">
+      <div className="cart-header">
+        <h1>Shopping Cart</h1>
+        <p className="cart-subtitle">
+          {cart.length} {cart.length === 1 ? 'item' : 'items'} in your cart
+        </p>
+      </div>
+
+      {cart.length > 0 ? (
+        <div className="cart-content">
+          <div className="cart-items">
+            {cart.map((pro) => (
+              <div className="cart-item" key={pro.Id}>
+                <div className="cart-item-image">
+                  <img src={pro.image} alt={pro.name} />
+                </div>
+                
+                <div className="cart-item-details">
+                  <h3 className="cart-item-name">{pro.name}</h3>
+                  <div className="cart-item-meta">
+                    <span className="cart-item-price">₹{pro.price}</span>
+                    {pro.fastDelivery && (
+                      <span className="delivery-badge">
+                        <FaTruck /> Fast Delivery
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="cart-item-quantity">
+                  <select
+                    value={pro.qty}
+                    onChange={(e) => dispatch({
+                      type: "Change_Cart_Qty",
+                      payload: {
+                        id: pro.Id,
+                        qty: e.target.value
+                      }
+                    })}
+                  >
+                    {[...Array(pro.inStock)].map((_, index) => (
+                      <option key={index + 1} value={index + 1}>
+                        {index + 1}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="cart-item-total">
+                  ₹{(Number(pro.price) * pro.qty).toFixed(2)}
+                </div>
+
+                <button
+                  className="remove-item-btn"
+                  onClick={() => dispatch({
+                    type: "Remove_from_cart",
+                    payload: pro
+                  })}
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="cart-summary">
+            <div className="summary-header">
+              <FaShoppingBag />
+              <h2>Order Summary</h2>
+            </div>
+
+            <div className="summary-details">
+              <div className="summary-row">
+                <span>Subtotal</span>
+                <span>₹{total.toFixed(2)}</span>
+              </div>
+              <div className="summary-row">
+                <span>Shipping</span>
+                <span>Free</span>
+              </div>
+              <div className="summary-row total">
+                <span>Total</span>
+                <span>₹{total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <button className="checkout-btn">
+              <FaCreditCard />
+              Proceed to Checkout
+            </button>
+
+            <div className="cart-features">
+              <div className="feature">
+                <FaTruck />
+                <span>Free Delivery</span>
+              </div>
+              <div className="feature">
+                <FaCreditCard />
+                <span>Secure Payment</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="empty-cart">
+          <FaShoppingBag className="empty-cart-icon" />
+          <h2>Your cart is empty</h2>
+          <p>Looks like you haven't added anything to your cart yet.</p>
+          <button className="continue-shopping-btn">
+            Continue Shopping
+          </button>
+        </div>
+      )}
     </div>
   )
 }
